@@ -66,11 +66,19 @@ if fetch_btn:
                 # Download logic
                 video_url = info.get('url')
                 if video_url:
-                    st.download_button(
-                        label=f"⬇️ Download {info.get('title', 'Video')[:20]}",
-                        data=requests.get(video_url).content,
-                        file_name=f"{info.get('id', 'video')}.mp4",
-                        mime="video/mp4"
-                    )
+                    try:
+                        # Use streaming for memory efficiency
+                        response = requests.get(video_url, stream=True)
+                        if response.status_code == 200:
+                            st.download_button(
+                                label=f"⬇️ Download {info.get('title', 'Video')[:20]}",
+                                data=response.content,
+                                file_name=f"{info.get('id', 'video')}.mp4",
+                                mime="video/mp4"
+                            )
+                        else:
+                            st.error("Failed to fetch video content.")
+                    except Exception as e:
+                        st.error(f"Download error: {e}")
                 st.write(f"Duration: {info.get('duration_string')}")
 
